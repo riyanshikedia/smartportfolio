@@ -35,32 +35,14 @@ Beta:                0.773 (Defensive)
 - 4GB+ RAM
 - Git
 
-### 🎯 One-Command Setup (Recommended)
+### 📋 Step-by-Step Setup
 
+#### 1. Clone and Environment Setup
 ```bash
 # Clone repository
 git clone https://github.com/yourusername/SmartPortfolio.git
 cd SmartPortfolio
 
-# Run automated setup (handles everything!)
-python setup.py
-```
-
-The setup script will:
-- ✅ Check Python version
-- ✅ Create virtual environment
-- ✅ Install all dependencies
-- ✅ Create configuration files
-- ✅ Set up SQL Server with Docker (if available)
-- ✅ Create database schema
-- ✅ Test the installation
-
-### 🔧 Manual Setup (Alternative)
-
-If you prefer manual setup or the automated script fails:
-
-#### 1. Environment Setup
-```bash
 # Create virtual environment
 python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
@@ -104,23 +86,41 @@ cp env.example .env
 python scripts/setup_database.py
 ```
 
-### 🚀 Run Analysis
+### 🎯 Complete Analysis Pipeline
+
+Run these scripts in sequence to perform the entire analysis:
 
 ```bash
 # Activate virtual environment
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 
-# Run complete pipeline
-python scripts/run_data_collection.py       # 1. Collect S&P 500 data
-python scripts/run_technical_indicators.py  # 2. Calculate indicators
-python scripts/run_screening.py             # 3. Screen stocks
-python scripts/run_ml_prediction.py         # 4. ML predictions
-python scripts/run_optimization.py          # 5. Optimize portfolio
-python scripts/run_backtest.py              # 6. Backtest performance
+# 1. Data Collection
+python scripts/run_data_collection.py
 
-# Or run Jupyter notebooks
+# 2. Technical Indicators
+python scripts/run_technical_indicators.py
+
+# 3. Stock Screening
+python scripts/run_screening.py
+
+# 4. ML Predictions
+python scripts/run_ml_prediction.py
+
+# 5. Portfolio Optimization
+python scripts/run_optimization.py
+
+# 6. Backtesting
+python scripts/run_backtest.py
+```
+
+### 📊 View Results
+
+After running the pipeline, open Jupyter Lab to see interactive results:
+```bash
 jupyter lab
 ```
+
+Then open `notebooks/06_dashboard.ipynb` to view your portfolio analysis!
 
 ### 🐛 Troubleshooting
 
