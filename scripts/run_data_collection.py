@@ -28,28 +28,55 @@ def get_sp500_tickers():
     print("\n📊 Fetching S&P 500 tickers from Wikipedia...")
     
     url = 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies'
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, 'html.parser')
-    table = soup.find('table', {'id': 'constituents'})
     
-    tickers_data = []
-    for row in table.find_all('tr')[1:]:
-        cols = row.find_all('td')
-        if len(cols) >= 4:
-            ticker = cols[0].text.strip().replace('.', '-')
-            company = cols[1].text.strip()
-            sector = cols[2].text.strip()
-            industry = cols[3].text.strip()
-            tickers_data.append({
-                'ticker': ticker,
-                'company_name': company,
-                'sector': sector,
-                'industry': industry
-            })
-    
-    df = pd.DataFrame(tickers_data)
-    print(f"✅ Found {len(df)} S&P 500 companies")
-    return df
+    try:
+        response = requests.get(url, timeout=30)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Try multiple selectors for the table
+        table = soup.find('table', {'id': 'constituents'})
+        if not table:
+            table = soup.find('table', {'class': 'wikitable'})
+        if not table:
+            table = soup.find('table')
+            
+        if not table:
+            print("❌ Could not find S&P 500 table on Wikipedia")
+            raise Exception("Table not found")
+            
+        print(f"✅ Found table with selector: {table.get('id', 'class')}")
+        
+        tickers_data = []
+        rows = table.find_all('tr')[1:]  # Skip header row
+        
+        for row in rows:
+            cols = row.find_all('td')
+            if len(cols) >= 4:
+                ticker = cols[0].text.strip().replace('.', '-')
+                company = cols[1].text.strip()
+                sector = cols[2].text.strip()
+                industry = cols[3].text.strip()
+                tickers_data.append({
+                    'ticker': ticker,
+                    'company_name': company,
+                    'sector': sector,
+                    'industry': industry
+                })
+        
+        if not tickers_data:
+            raise Exception("No ticker data found in table")
+            
+        df = pd.DataFrame(tickers_data)
+        print(f"✅ Found {len(df)} S&P 500 companies")
+        return df
+        
+    except requests.RequestException as e:
+        print(f"❌ Network error fetching data: {e}")
+        raise
+    except Exception as e:
+        print(f"❌ Error parsing S&P 500 data: {e}")
+        raise
 
 def fetch_stock_data(tickers, days=250):
     """Fetch historical price data for all tickers"""
@@ -119,7 +146,14 @@ def main():
         
         # Save tickers to database
         print("\n💾 Saving tickers to database...")
-        db.execute_query("DELETE FROM market.sp500_tickers")
+        
+        # Check if table exists, if not create it or skip delete
+        if db.table_exists('sp500_tickers', 'market'):
+            db.execute_query("DELETE FROM market.sp500_tickers")
+        else:
+            print("⚠️  Table market.sp500_tickers doesn't exist. Please run setup_database.py first.")
+            return 1
+            
         db.insert_data(tickers_df, 'sp500_tickers', 'market')
         print(f"✅ Saved {len(tickers_df)} tickers to market.sp500_tickers")
         
@@ -129,7 +163,14 @@ def main():
         
         # Save prices to database
         print("\n💾 Saving prices to database...")
-        db.execute_query("DELETE FROM market.daily_prices")
+        
+        # Check if table exists, if not create it or skip delete
+        if db.table_exists('daily_prices', 'market'):
+            db.execute_query("DELETE FROM market.daily_prices")
+        else:
+            print("⚠️  Table market.daily_prices doesn't exist. Please run setup_database.py first.")
+            return 1
+            
         db.insert_data(prices_df, 'daily_prices', 'market', chunksize=1000)
         print(f"✅ Saved {len(prices_df)} price records to market.daily_prices")
         
