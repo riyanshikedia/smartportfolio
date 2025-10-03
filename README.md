@@ -142,7 +142,7 @@ flake8 utils/ tests/
 3. Make your changes
 4. Submit a pull request
 
-## ⚠️ Disclaimer
+##  Disclaimer
 
 **This software is for educational and research purposes only.**
 
@@ -155,12 +155,3 @@ flake8 utils/ tests/
 
 MIT License - See [LICENSE](LICENSE) for details.
 
----
-
-<div align="center">
-
-**Built with ❤️ for quantitative finance**
-
-⭐ **Star this repo if you find it useful!** ⭐
-
-</div>
